@@ -3,85 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Editor</title>
+    <title>Advanced File Processing Tools</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
-        }
-
-        .editor {
-            margin: 20px;
-            padding: 20px;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        textarea {
-            width: 100%;
-            height: 300px;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-
-        button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
+        /* CSS styles here */
+        /* ... (your existing styles) ... */
     </style>
 </head>
 <body>
-    <div class="editor">
-        <textarea id="file-content"></textarea>
-        <button id="open-button">Open .txt File</button>
-        <button id="save-button">Save .txt File</button>
-    </div>
-    <input type="file" id="file-input" accept=".txt" style="display: none;">
+    <header>
+        <h1>Advanced File Processing Tools</h1>
+    </header>
+    <main>
+        <input type="file" id="fileInput" accept=".txt, .jpg, .jpeg, .png, .wav, .mp3, .pdf, .mp4, .avi, .csv">
+        <label for="toolSelect">Select a Tool:</label>
+        <select id="toolSelect">
+            <option value="display">Display File</option>
+            <option value="analyzeText">Text Analysis</option>
+            <option value="manipulateImage">Image Manipulation</option>
+            <option value="processAudio">Audio Processing</option>
+            <option value="generatePDF">Generate PDF</option>
+            <option value="compressFile">File Compression</option>
+            <option value="visualizeData">Data Visualization</option>
+            <option value="analyzeJSON">JSON Data Analysis</option>
+            <option value="processVideo">Video Processing</option>
+            <option value="visualizeGeospatial">Geospatial Data Visualization</option>
+            <option value="convertDocument">Document Conversion</option>
+            <option value="encryptDecrypt">Encryption/Decryption</option>
+            <option value="codeEditor">Code Editor</option>
+        </select>
+        <button id="processButton">Process File</button>
+        <button id="downloadButton" disabled>Download Processed File</button>
+        <div id="output"></div>
+    </main>
     <script>
-        // Function to open a .txt file
-        document.getElementById("open-button").addEventListener("click", function () {
-            document.getElementById("file-input").click();
-        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const fileInput = document.getElementById("fileInput");
+            const toolSelect = document.getElementById("toolSelect");
+            const processButton = document.getElementById("processButton");
+            const downloadButton = document.getElementById("downloadButton");
+            const outputDiv = document.getElementById("output");
+            let processedData = null;
+            let processedFileName = "processed_file.txt"; // You can set a default filename.
 
-        document.getElementById("file-input").addEventListener("change", function (event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const content = e.target.result;
-                    document.getElementById("file-content").value = content;
-                };
-                reader.readAsText(file);
-            }
-        });
+            processButton.addEventListener("click", function () {
+                const file = fileInput.files[0];
+                const selectedTool = toolSelect.value;
 
-        // Function to save the current text as a .txt file
-        document.getElementById("save-button").addEventListener("click", function () {
-            const content = document.getElementById("file-content").value;
-            const blob = new Blob([content], { type: "text/plain" });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "textfile.txt";
-            a.style.display = "none";
-            document.body.appendChild(a);
-            
-            a.click();
-            
-            window.URL.revokeObjectURL(url);
+                if (file) {
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        const fileContent = e.target.result;
+                        const fileType = file.type;
+
+                        if (selectedTool === "display") {
+                            // Display File tool
+                            if (fileType.includes("text")) {
+                                outputDiv.textContent = fileContent;
+                            } else if (fileType.includes("image")) {
+                                outputDiv.innerHTML = `<img src="${fileContent}" alt="Uploaded Image">`;
+                            } else if (fileType.includes("audio")) {
+                                // Audio file display (you can add audio player controls)
+                                outputDiv.innerHTML = `<audio controls><source src="${fileContent}" type="${fileType}">Your browser does not support the audio element.</audio>`;
+                            } else if (fileType === "application/pdf") {
+                                // PDF file display (you can add a PDF viewer)
+                                outputDiv.innerHTML = `<iframe src="${fileContent}" width="100%" height="600px"></iframe>`;
+                            } else {
+                                outputDiv.textContent = "Unsupported file type.";
+                            }
+                        } else if (selectedTool === "analyzeText" && fileType.includes("text")) {
+                            // Text Analysis tool
+                            // Count words
+                            const wordCount = fileContent.split(/\s+/).filter(word => word.trim() !== "").length;
+                            outputDiv.innerHTML = `<p>Word Count: ${wordCount}</p>`;
+                        }
+
+                        // Add logic for other tools here...
+
+                        outputDiv.textContent = "Processing completed.";
+                        downloadButton.removeAttribute("disabled");
+                    };
+
+                    if (fileType.includes("text") || fileType.includes("image") || fileType.includes("audio") || fileType === "application/pdf" || fileType.includes("json") || fileType.includes("mp4") || fileType.includes("avi") || fileType.includes("csv")) {
+                        reader.readAsDataURL(file);
+                    } else {
+                        outputDiv.textContent = "Unsupported file type.";
+                    }
+                } else {
+                    outputDiv.textContent = "Please select a file.";
+                }
+            });
+
+            downloadButton.addEventListener("click", function () {
+                if (processedData) {
+                    // Create a Blob from the processed data
+                    const blob = new Blob([processedData], { type: "text/plain" });
+
+                    // Create a temporary link element to trigger the download
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = processedFileName;
+
+                    // Trigger the download
+                    a.click();
+
+                    // Clean up
+                    URL.revokeObjectURL(a.href);
+                }
+            });
         });
     </script>
 </body>
